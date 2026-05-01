@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flight Route Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f2ec;
+      --surface: #ffffff;
+      --border: rgba(0,0,0,0.12);
+      --border-strong: rgba(0,0,0,0.25);
+      --text: #1a1a18;
+      --text-muted: #6a6866;
+      --accent: #BA7517;
+      --accent-light: rgba(186,117,23,0.15);
+      --dot-inactive: #c0bdb3;
+      --line-inactive: #dbd8d0;
+      --city-inactive: #9a9890;
+      --radius: 10px;
+      --radius-lg: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111110;
+        --surface: #1c1c1a;
+        --border: rgba(255,255,255,0.1);
+        --border-strong: rgba(255,255,255,0.22);
+        --text: #e8e6de;
+        --text-muted: #8a8880;
+        --accent: #EF9F27;
+        --accent-light: rgba(239,159,39,0.15);
+        --dot-inactive: #4a4a45;
+        --line-inactive: #2e2e2a;
+        --city-inactive: #5a5a55;
+      }
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 26px;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    select {
+      width: 100%;
+      padding: 9px 12px;
+      font-size: 14px;
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      outline: none;
+    }
+    select:focus { border-color: var(--accent); }
+
+    .mode-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .mode-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 9px 0;
+      font-size: 13px;
+      border: 0.5px solid var(--border-strong);
+      border-radius: var(--radius);
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .mode-btn.active {
+      background: var(--accent-light);
+      color: var(--accent);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    .find-btn {
+      width: 100%;
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      background: var(--accent);
+      color: #fff;
+      transition: opacity 0.15s;
+      margin-bottom: 1.25rem;
+    }
+    .find-btn:hover { opacity: 0.88; }
+
+    .map-wrap {
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--bg);
+      margin-bottom: 1rem;
+    }
+    canvas { display: block; width: 100%; }
+
+    .result-panel {
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      display: none;
+    }
+    .result-panel.show { display: block; }
+
+    .result-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .result-route {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--text);
+    }
+    .result-metric { font-size: 24px; font-weight: 500; color: var(--accent); }
+    .result-metric-label { font-size: 11px; color: var(--text-muted); text-align: right; }
+
+    .stops {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .stop-city { font-size: 13px; font-weight: 500; color: var(--text); }
+    .stop-seg {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+      background: var(--bg);
+      padding: 2px 7px;
+      border-radius: 20px;
+      border: 0.5px solid var(--border);
+    }
+    .stop-arrow { font-size: 13px; color: var(--text-muted); }
+
+    .error { font-size: 13px; color: #c0392b; text-align: center; margin-top: 8px; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>Flight route finder</h1>
+  <p class="subtitle">Fastest or cheapest path between cities using Dijkstra's algorithm</p>
+
+  <div class="controls">
+    <div class="field">
+      <label>From</label>
+      <select id="fromCity"></select>
+    </div>
+    <div class="field">
+      <label>To</label>
+      <select id="toCity"></select>
+    </div>
+  </div>
+
+  <p class="mode-label">Optimise for</p>
+  <div class="mode-group">
+    <button class="mode-btn active" id="btnTime"  onclick="setMode('time')">⏱ Fastest</button>
+    <button class="mode-btn"        id="btnPrice" onclick="setMode('price')">$ Cheapest</button>
+  </div>
+
+  <button class="find-btn" onclick="findRoute()">Find route →</button>
+
+  <div class="map-wrap">
+    <canvas id="mapCanvas" width="660" height="340"></canvas>
+  </div>
+
+  <div class="result-panel" id="resultPanel">
+    <div class="result-top">
+      <div class="result-route" id="routeLabel"></div>
+      <div>
+        <div class="result-metric" id="metricVal"></div>
+        <div class="result-metric-label" id="metricLbl"></div>
+      </div>
+    </div>
+    <div class="stops" id="stopsList"></div>
+  </div>
+  <p class="error" id="errMsg"></p>
+</div>
+
+<script src="dijkstra.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
