@@ -5,12 +5,11 @@ function buildGraph(flights, type = "time") {
     if (!graph[flight.from]) graph[flight.from] = {};
     if (!graph[flight.to]) graph[flight.to] = {};
 
-    if (
-      graph[flight.from][flight.to] === undefined ||
-      flight[type] < graph[flight.from][flight.to]
-    ) {
-      graph[flight.from][flight.to] = flight[type];
-    }
+    
+    graph[flight.from][flight.to] = flight[type];
+
+    
+    graph[flight.to][flight.from] = flight[type];
   }
 
   return graph;
@@ -68,19 +67,30 @@ function dijkstra(graph, start, end) {
 }
 
 const flights = [
-  { from: "Yerevan",  to: "Moscow",   time: 2,  price: 200 },
-  { from: "Yerevan",  to: "Paris",    time: 5,  price: 500 },
-  { from: "Moscow",   to: "Berlin",   time: 4,  price: 300 },
-  { from: "Paris",    to: "Berlin",   time: 1,  price: 150 },
-  { from: "Berlin",   to: "Rome",     time: 2,  price: 180 },
-  { from: "Moscow",   to: "Dubai",    time: 4,  price: 350 },
-  { from: "Paris",    to: "London",   time: 1,  price: 120 },
-  { from: "London",   to: "New York", time: 7,  price: 600 },
-  { from: "Dubai",    to: "New York", time: 14, price: 900 },
-  { from: "Rome",     to: "New York", time: 9,  price: 700 },
+  { from: "Yerevan", to: "Moscow",   time: 2,  price: 200 },
+  { from: "Yerevan", to: "Paris",    time: 5,  price: 500 },
+
+  { from: "Moscow",  to: "Berlin",   time: 4,  price: 300 },
+  { from: "Moscow",  to: "Istanbul", time: 3,  price: 250 },
+
+  { from: "Berlin",  to: "Paris",    time: 2,  price: 170 },
+  { from: "Berlin",  to: "London",   time: 2,  price: 180 },
+
+  { from: "Paris",   to: "London",   time: 1,  price: 120 },
+  { from: "Paris",   to: "Rome",     time: 2,  price: 160 },
+
+  { from: "Rome",    to: "Madrid",   time: 2,  price: 140 },
+
+  { from: "Istanbul",to: "Dubai",    time: 4,  price: 350 },
+
+  { from: "Dubai",   to: "New York", time: 14, price: 900 },
+
+  { from: "London",  to: "New York", time: 7,  price: 600 },
+
+  { from: "Madrid",  to: "New York", time: 8,  price: 650 },
 ];
 
-// Example usage:
+
 const graphByTime  = buildGraph(flights, "time");
 const graphByPrice = buildGraph(flights, "price");
 

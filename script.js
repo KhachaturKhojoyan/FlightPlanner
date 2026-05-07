@@ -6,8 +6,10 @@
     "London":   { x: 0.39, y: 0.21 },
     "Rome":     { x: 0.50, y: 0.32 },
     "Dubai":    { x: 0.80, y: 0.40 },
-    "New York": { x: 0.16, y: 0.28 },
-  };
+    "New York":  { x: 0.16, y: 0.28 },
+    "Istanbul": { x: 0.60, y: 0.30 },
+    "Madrid":   { x: 0.34, y: 0.33 },
+};
 
   let mode = 'time';
   let lastResult = null;
@@ -31,9 +33,13 @@
   }
 
   function getSegmentValue(from, to, type) {
-    const f = flights.find(fl => fl.from === from && fl.to === to);
-    return f ? f[type] : 0;
-  }
+  const f = flights.find(fl =>
+    (fl.from === from && fl.to === to) ||
+    (fl.from === to && fl.to === from)
+  );
+
+  return f ? f[type] : 0;
+}
 
   function findRoute() {
     const from = fromSel.value, to = toSel.value;
