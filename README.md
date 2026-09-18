@@ -2,6 +2,10 @@
 
 An interactive flight route planner that finds the fastest or cheapest path between cities, built with vanilla JavaScript and rendered on an HTML5 Canvas. Under the hood it uses **Dijkstra's algorithm** to compute the optimal route through a small network of flights.
 
+## 🌐 Live Demo
+**Try the application:**  
+https://khachaturkhojoyan.github.io/FlightPlanner/
+
 ## Screenshot
 
 <img width="722" height="803" alt="image" src="https://github.com/user-attachments/assets/9c9750bb-e169-4369-aa3f-a73ad6f8ea24" />
